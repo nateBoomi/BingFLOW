@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" class="manywho" style="height: 100%;">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex">
+
+
+    <link rel="apple-touch-icon" href="https://us-assets.flow-prod.boomi.com/img/favicon/apple-touch-icon.png" />
+    <link rel="apple-touch-icon" sizes="57x57" href="https://us-assets.flow-prod.boomi.com/img/favicon/apple-touch-icon-57x57.png" />
+    <link rel="apple-touch-icon" sizes="72x72" href="https://us-assets.flow-prod.boomi.com/img/favicon/apple-touch-icon-72x72.png" />
+    <link rel="apple-touch-icon" sizes="76x76" href="https://us-assets.flow-prod.boomi.com/img/favicon/apple-touch-icon-76x76.png" />
+    <link rel="apple-touch-icon" sizes="114x114" href="https://us-assets.flow-prod.boomi.com/img/favicon/apple-touch-icon-114x114.png" />
+    <link rel="apple-touch-icon" sizes="120x120" href="https://us-assets.flow-prod.boomi.com/img/favicon/apple-touch-icon-120x120.png" />
+    <link rel="apple-touch-icon" sizes="144x144" href="https://us-assets.flow-prod.boomi.com/img/favicon/apple-touch-icon-144x144.png" />
+    <link rel="apple-touch-icon" sizes="152x152" href="https://us-assets.flow-prod.boomi.com/img/favicon/apple-touch-icon-152x152.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="https://us-assets.flow-prod.boomi.com/img/favicon/apple-touch-icon-180x180.png" />
+    <link id="theme" />
+    <link rel="shortcut icon" href="https://master-boomi-flow-assets-prod-us-east-1.s3.amazonaws.com/ef3210f4-6711-4ce9-ac6c-6212be3767e5/bingflow.png" type="image/x-icon" /><!-- Path to favicon -->
+    <title>BingFLOW</title><!-- Application Name -->
+    <style>
+        .mw-bs .wait-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            min-height: 64px;
+            z-index: 1100;
+            background-color: rgba(255, 255, 255, 0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mw-bs .wait-message {
+            position: relative;
+            text-align: center;
+            margin-top: 1em;
+            display: block;
+            top: 40%;
+            font-size: 2em;
+            padding: 0 2em;
+            animation: fadein 1s;
+        }
+
+        /* outer */
+        .mw-bs .wait-spinner {
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            border: 4px solid rgb(206, 206, 206);
+            border-top-color: rgb(172, 172, 172);
+            animation: spin 750ms infinite linear, fadein 250ms;
+        }
+
+        @keyframes fadein {
+            0% {
+                opacity: 0;
+            }
+
+            66% {
+                opacity: 0;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+        
+        .BingFlowRow {
+            display: flex;
+        }
+        
+        .BingFlowSquare {
+            width: 20%;
+            aspect-ratio: 3;
+            position: relative; 
+            border: 2px black solid;
+            border-radius: 5px;
+            margin: 0.5%;
+            display: flex;
+            background: lightgray;
+            justify-content: center;
+            align-content: center;
+            transition: all 0.5s;
+            overflow-wrap: anywhere;
+            text-align: center;
+            flex-wrap: wrap;
+            
+        }
+        
+        .BingFlowSquare.BFSActive{
+            border: 3px lime solid;
+            background: white;
+        }
+        
+        .victoryText{
+            background-image: repeating-linear-gradient(45deg, lime, indigo, blue, violet, red, pink, yellow, lime);
+            animation: rainbow 5s infinite cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-size: 400% 400%;
+        }
+        @keyframes rainbow { 
+              0%{background-position:0% 50%}
+              50%{background-position:100% 25%}
+              100%{background-position:0% 50%}
+        }
+ 
+        
+    </style>
+</head>
+<body style="height: 100%;">
+    <div id="manywho">
+        <div id="loader" class="mw-bs" style="width: 100%; height: 100%;">
+            <div class="wait-container">
+                <div class="wait-spinner"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://us-assets.flow-prod.boomi.com/js/vendor/jquery-3.4.1.min.js"></script>
+
+    <script>
+        var manywho = {
+            cdnUrl: 'https://us-assets.flow-prod.boomi.com',
+            customResources: [
+                'https://assets.boomi.media/css/theme/boomi.css',
+                'https://assets.boomi.media/css/global.css'
+                ],
+            requires: ['core', 'bootstrap3'],
+            initialize: function () {
+
+                var queryParameters = manywho.utils.parseQueryString(window.location.search.substring(1));
+
+                manywho.settings.initialize({
+                    platform: {
+                        uri: '',
+                    },
+                    adminTenantId: 'da497693-4d02-45db-bc08-8ea16d2ccbdf',
+                    playerUrl: [ location.protocol, '//', location.host, location.pathname ].join(''),
+                    joinUrl: [ location.protocol, '//', location.host, location.pathname ].join(''),
+                    isScrollResetEnabled: false,
+                });
+
+                var inputs = [];
+                var board = queryParameters['board'];//
+                if (board!=null){//
+                   inputs.push({ "BingFlowLZ": board });//
+                }//
+
+                inputs.push({ "BingFLOW Player": true });//
+				var jsonInputs = manywho.json.generateFlowInputs(inputs);
+
+                var options = {
+                    authentication: {
+                        sessionId: queryParameters['session-token'],
+                        sessionUrl: queryParameters['session-url']
+                    },
+                    navigationElementId: queryParameters['navigation-element-id'],
+                    mode: queryParameters['mode'],
+                    reportingMode: queryParameters['reporting-mode'],
+                    replaceUrl: false,
+                    collaboration: {
+                        isEnabled: false
+                    },
+                    inputs: jsonInputs,
+                    annotations: null,
+                    navigation: {
+                        isFixed: true,
+                        isWizard: false
+                    },
+                    callbacks: [],
+                    theme: null,
+                    disableScripting: true
+                };
+
+                var tenantId = queryParameters['tenant-id'];
+                if (!tenantId) {
+                    tenantId =
+                        window.location.pathname
+                        .split('/')
+                        .filter(function (path) {
+                            return path && path.length > 0;
+                        })[0];
+                }
+                
+                class BingFlow extends React.Component {
+                    constructor(props) {
+                        super(props);
+                        this.state = {
+                            isVisible: true,
+                            height: null,
+                            icon: 'toggle-icon glyphicon glyphicon-triangle-bottom',
+                            windowWidth: window.innerWidth,
+                            sortByOrder: 'ASC',
+                            lastOrderBy: '',
+                            objectData: null,
+                        };
+                        this.toggleVisibility = this.toggleVisibility.bind(this);
+                        this.getLabel = this.getLabel.bind(this);
+                        this.onSelect = this.onSelect.bind(this);
+                        //this.handleResizeDebounced = manywho.utils.debounce(this.handleResize, 200);
+                    }
+                    componentDidMount() {
+                    }
+                    componentWillUnmount() {
+                    }
+                    onSelect(e) {
+                        e.stopPropagation();
+                        this.props.select(e.currentTarget.id);
+                    }
+                    getLabel(label, required) {
+                        if (!manywho.utils.isNullOrWhitespace(label)) {
+                            const labelClasses = manywho.settings.global('collapsible', this.props.flowKey)
+                                ? 'container-label clickable-section'
+                                : 'container-label';
+                            const labelContent = (manywho.settings.global('collapsible', this.props.flowKey) && label)
+                                ? [React.createElement("i", { key: manywho.utils.guid(), className: this.state.icon }), label]
+                                : [label];
+                            if (required) {
+                                labelContent.push(React.createElement("span", { className: "input-required" }, " *"));
+                            }
+                            return (React.createElement("h3", { className: labelClasses, onClick: this.toggleVisibility }, labelContent));
+                        }
+                        return null;
+                    }
+                    getDisplayColumns(columns, outcomes) {
+                        const displayColumns = manywho.component.getDisplayColumns(columns) || [];
+                        if (outcomes.filter(outcome => !outcome.isBulkAction).length > 0) {
+                            displayColumns.unshift('mw-outcomes');
+                        }
+                        return displayColumns;
+                    }
+                    toggleVisibility(event) {
+                        event.preventDefault();
+                        if (manywho.settings.global('collapsible', this.props.flowKey)) {
+                            if (this.state.isVisible) {
+                                this.setState({
+                                    isVisible: false,
+                                    height: findDOMNode(this).clientHeight,
+                                    icon: 'toggle-icon glyphicon glyphicon-triangle-right',
+                                });
+                                requestAnimationFrame(() => {
+                                    this.setState({ height: 0 });
+                                });
+                            }
+                            else {
+                                this.setState({
+                                    isVisible: true,
+                                    height: null,
+                                    icon: 'toggle-icon glyphicon glyphicon-triangle-bottom',
+                                });
+                            }
+                        }
+                    }
+                
+                    renderFooter(pageIndex, hasMoreResults, onNext, onPrev, onFirstPage, isDesignTime) {
+                		const Pagination = manywho.component.getByName('mw-pagination');
+                        if (pageIndex > 1 || hasMoreResults) {
+                            const props = {
+                                pageIndex,
+                                hasMoreResults,
+                                onNext,
+                                onPrev,
+                                onFirstPage,
+                                isDesignTime,
+                            };
+                            return React.createElement(Pagination, Object.assign({}, props));
+                        }
+                        return null;
+                    }
+                    render() {
+                        manywho.log.info(`Rendering Table: ${this.props.id}`);
+                        const model = manywho.model.getComponent(this.props.id, this.props.flowKey);
+                        const state = this.props.isDesignTime
+                            ? { error: null, loading: false }
+                            : manywho.state.getComponent(this.props.id, this.props.flowKey) || {};
+                        const outcomes = manywho.model.getOutcomes(this.props.id, this.props.flowKey);
+                        const selectedRows = (state.objectData || []).filter(objectData => objectData.isSelected);
+                        let props = {
+                            model,
+                            selectedRows,
+                            id: this.props.id,
+                            objectData: this.props.objectData,
+                            totalObjectData: (!model.objectDataRequest && model.objectData) ?
+                                model.objectData.length :
+                                null,
+                            outcomes: outcomes.filter(outcome => !outcome.isBulkAction),
+                            displayColumns: this.getDisplayColumns(model.columns, outcomes),
+                            flowKey: this.props.flowKey,
+                            lastSortedBy: this.state.lastSortedBy,
+                            sortByOrder: this.state.sortByOrder,
+                            isValid: !(model.isValid === false || state.isValid === false || state.error),
+                            isDesignTime: this.props.isDesignTime,
+                            sortedBy: this.props.sortedBy,
+                            sortedIsAscending: this.props.sortedIsAscending,
+                        };
+                        if (!this.props.isDesignTime) {
+                            props = manywho.utils.extend(props, {
+                                onOutcome: this.props.onOutcome,
+                                onSelect: this.onSelect,
+                                selectAll: this.props.selectAll,
+                            });
+                            if (model.attributes && !model.attributes.isRowSelectionDisabled) {
+                                props.onRowClicked = this.onSelect;
+                            }
+                        }
+                		let { contentElement } = this.props;
+                
+                		if (!contentElement) contentElement = React.createElement(BingFlowChild, Object.assign({}, props));
+                
+                        let classNames = 'table-container clear-fix';
+                
+                        if (model.isVisible === false) {
+                            classNames += ' hidden';
+                        }
+                        const stylingClasses = manywho.styling.getClasses(this.props.parentId, this.props.id, 'table', this.props.flowKey).join(' ');
+                        classNames += ` ${stylingClasses}`;
+                        let labelElement = null;
+                        if (!manywho.utils.isNullOrWhitespace(model.label)) {
+                            labelElement = React.createElement("label", null, model.label);
+                        }
+                        let validationElement = null;
+                        if (!props.isValid) {
+                            validationElement = (React.createElement("div", { className: "has-error" },
+                                React.createElement("span", { className: "help-block" }, model.validationMessage || state.validationMessage)));
+                        }
+                        let isDisabled = false;
+                        if (model.isEnabled === false || this.props.isLoading) {
+                            isDisabled = true;
+                        }
+
+                        const Wait = manywho.component.getByName('wait');
+                
+                        return (React.createElement("div", { className: classNames, id: this.props.id },
+                            labelElement,
+                            validationElement,
+                            React.createElement("div", { className: `clearfix ${(this.state.isVisible ? '' : ' hidden')}` },
+                                contentElement,
+                                this.renderFooter(this.props.page, this.props.hasMoreResults, this.props.onNext, this.props.onPrev, this.props.onFirstPage, this.props.isDesignTime),
+                                React.createElement(Wait, { isVisible: state.loading, message: state.loading && state.loading.message, isSmall: true }))));
+                    }
+                }
+                manywho.component.registerItems('BingFlow', BingFlow);
+                
+                const Dynamic = ({ name, props }) => {
+                    const Component = manywho.component.getByName(name);
+                    if (typeof Component !== 'undefined') {
+                        Component.displayName = name;
+                    }
+                    return Component ? React.createElement(Component, props) : React.createElement("noscript", null);
+                };
+                
+                const selectAllRef = React.createRef();
+                
+                class BingFlowChild extends React.Component {
+                    constructor() {
+                        super(...arguments);
+                        this.onOutcomeClick = (e, outcome) => {
+                            //const objectDataId = e.currentTarget.parentElement.getAttribute('data-item');
+                            this.props.onOutcome(e.currentTarget.id, e.currentTarget.getAttribute('outcome'));
+                        };
+                        this.onCellEditCommitted = (id, propertyId, value) => {
+                            let objectData = this.setPropertyValue(this.props.objectData, id, propertyId, value);
+                			manywho.state.setComponent(this.props.id, { objectData }, this.props.flowKey, false);
+                        };		
+                    }
+                    componentDidUpdate() {
+                        const selectAll = selectAllRef.current;
+                        if (selectAll) {
+                            selectAll.indeterminate =
+                                (this.props.selectedRows.length > 0 &&
+                                    this.props.selectedRows.length !== this.props.totalObjectData);
+                        }
+                    }
+                    setPropertyValue(objectData, id, propertyId, value) {
+                        return objectData.map((item) => {
+                            item.properties = item.properties.map((prop) => {
+                                if (manywho.utils.isEqual(prop.typeElementPropertyId, propertyId, true)
+                                    && manywho.utils.isEqual(item.internalId, id, true)) {
+                                    if (Array.isArray(value)) {
+                                        prop.objectData = value;
+                                    }
+                                    else {
+                                        prop.contentValue = value;
+                                    }
+                                }
+                                return prop;
+                            });
+                            return item;
+                        });
+                    }
+
+                	checkRowIsSelected(selectedRow, row){
+                		const rowSelectedOnClientSide = selectedRow.externalId || selectedRow.internalId;
+                		const rowSelectedOnServerSide = row.externalId || row.internalId;
+                		return rowSelectedOnServerSide === rowSelectedOnClientSide;
+                	};
+                	
+                    renderRows(flowKey, objectData, outcomes, displayColumns, selectedRows, onRowClicked, onSelect, outcomeDisplay) {
+                        const Outcome = manywho.component.getByName('outcome');
+                        const TableInput = manywho.component.getByName('table-input');
+                        
+                        let rows = [];
+                        let row = [];
+                        
+                        for (let i = 0; i < objectData.length; i++){
+                            let item = objectData[i];
+                            
+                            //Generate column in row
+                            let display = null;
+                            let checked = false;
+                            
+                            displayColumns.map((column) => {
+                                if (column === 'mw-outcomes') {
+                                    return
+                                }
+                                let selectedProperty = item.properties.find(property => property.typeElementPropertyId === column.typeElementPropertyId);
+                                if (!manywho.utils.isNullOrWhitespace(column.typeElementPropertyToDisplayId)) {
+                                    if (selectedProperty !== null &&
+                                        selectedProperty.objectData !== null &&
+                                        selectedProperty.objectData.length) {
+                                        selectedProperty =
+                                            selectedProperty.objectData[0].properties
+                                                .find(childProperty => childProperty.typeElementPropertyId === column.typeElementPropertyToDisplayId);
+                                    }
+                                }
+                                if (selectedProperty) {
+                                    const contentValue = manywho.formatting.format(selectedProperty.contentValue, selectedProperty.contentFormat, selectedProperty.contentType, flowKey);
+                                    if (display === null) display = contentValue;
+                                    else checked = (contentValue == 'True');
+                                }
+                                //return React.createElement("td", { key: column.typeElementPropertyId });
+                            });
+                            
+                            let className = 'BingFlowSquare';
+                            if (checked) className += ' BFSActive'
+                            
+                            let col = React.createElement("div", { flowKey: flowKey, className: className, id: item.externalId, outcome: outcomes[0].id, onClick: this.onOutcomeClick, display: outcomeDisplay.outcomes },
+                                display);
+                            
+
+                            
+                            row.push(col);
+                            
+                            if (i == 11) row.push(React.createElement("div", { className: 'BingFlowSquare BFSActive'}, "FREE SPACE")); //Free space :)
+                            //5 columns per row
+                            
+                            if (row.length == 5){
+                                //rows.push(React.createElement("tr", { className: className, id: item.internalId, key: item.internalId, onClick: onRowClicked }, row));
+                                rows.push(React.createElement("tr", { className: 'BingFlowRow'}, row));
+                                row = [];
+                            }
+                            
+                        }
+                        
+                        if (row.length > 0){
+                            rows.push(React.createElement("tr", { className: 'BingFlowRow' }, row));
+                        }
+                        
+                        return rows;
+                    }
+                    render() {
+                        const isValid = (this.props.model.isValid !== undefined) ?
+                            this.props.model.isValid :
+                            this.props.isDesignTime && true;
+                        const tableClassName = [
+                            'table',
+                            (this.props.model.attributes.borderless &&
+                                manywho.utils.isEqual(this.props.model.attributes.borderless, 'true', true)) ?
+                                '' :
+                                'table-bordered',
+                            (this.props.model.attributes.striped &&
+                                manywho.utils.isEqual(this.props.model.attributes.striped, 'true', true)) ?
+                                'table-striped' :
+                                '',
+                            (this.props.isSelectionEnabled) ? 'table-hover' : '',
+                            (isValid) ? '' : 'table-invalid',
+                        ].join(' ');
+                        let rows = [];
+                		
+                		let total = 0;
+                		
+                		this.props.objectData.map((item) => {
+                			let quantity = 0;
+                			let cost = 0;
+                			item.properties.map((prop) => {
+                				if (manywho.utils.isEqual(prop.typeElementPropertyId, "65362a01-b389-4074-ba32-6430fda4d6bd", true)){
+                					quantity = prop.contentValue
+                				}
+                				if (manywho.utils.isEqual(prop.typeElementPropertyId, "8b35defd-b4f7-41e1-ad39-ed68c24dfa7d", true)){
+                					cost = prop.contentValue
+                				}
+                			});	
+                			if (quantity * cost > 0) total += quantity * cost;
+                		});
+                		
+                        rows = rows.concat(this.renderRows(this.props.flowKey, this.props.objectData || [], this.props.outcomes, this.props.displayColumns, this.props.selectedRows, this.props.onRowClicked, this.props.onSelect, this.props.model.attributes));
+                        return (React.createElement("div", { className: "table-responsive" },
+                            React.createElement("table", { className: tableClassName },
+                                React.createElement("tbody", null, rows))
+                			));
+                    }
+                }
+                manywho.component.register("BingFlowChild", BingFlow);
+
+                manywho.engine.initialize(
+                    tenantId,
+                    queryParameters['flow-id'],
+                    queryParameters['flow-version-id'],
+                    'main',
+                    queryParameters['join'],
+                    queryParameters['authorization'],
+                    options,
+                    queryParameters['initialization']
+                );
+
+            }
+        };
+    </script>
+
+    <script src="https://us-assets.flow-prod.boomi.com/js/loader.min.js"></script>
+</body>
+</html>
